@@ -1,11 +1,64 @@
-<mgl-map
-  id="map"
-  [style]="
-    'https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/arcgis/light-gray/base?token=AAPKe31b1b61c7184cc192f07a7e46d5bb93-lp1Nl87ScG65xgws6NtCqxqrvSA4ZRzLC7563uEysDkq_wheCekSsIInBWhXJs8'
-  "
-  [center]="[-79.3, 43.7]"
-  [doubleClickZoom]="false"
-  [zoom]="[9]"
-  [antialias]="true" [logoPosition]="'bottom-right'"
->
+<mgl-map id="map" [style]="
+                              'https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/arcgis/light-gray/base?token=AAPKe31b1b61c7184cc192f07a7e46d5bb93-lp1Nl87ScG65xgws6NtCqxqrvSA4ZRzLC7563uEysDkq_wheCekSsIInBWhXJs8'" [center]="[-79.3, 43.7]" [doubleClickZoom]="false" [zoom]="[9]" [antialias]="true" [logoPosition]="'bottom-right'">
+  <mgl-control position="top-left">Min Income -
+    {{minIncome | number}}</mgl-control>
+  <mgl-control position="top-left">Max Income -
+    {{maxIncome | number }}</mgl-control>
+  <mgl-control position="top-left">Average Income -
+    {{averageIncome | number}}</mgl-control>
+
+  <mgl-geojson-source id="geoData" [data]="geoData"></mgl-geojson-source>
+  <mgl-layer id="geoData" source="geoData" type="fill" (layerClick)="onClick($event)" [paint]="paintFill">
+    <mgl-popup *ngIf="selectedArea && popupLocation && displayModal" [lngLat]="popupLocation" [closeOnClick]="false" [closeButton]="false">
+      <div class="modal-content">
+        <div class="modal-header p-4 bg-purple-200 flex justify-between items-center">
+          <span class="flex">
+            <div class="color-pallette whitespace-nowrap mr-1" [style.backgroundColor]="getColorForIncome(selectedArea)">
+            </div>
+            <div>
+              {{ selectedArea.properties["AREA_NAME"] }}
+            </div>
+          </span>
+          <button type="button" class="text-xl" (click)="modalClose()">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="flex justify-between items-center p-1">
+            <span>Final 2016 demographics table_Average household size:</span>
+            <span class="font-bold">{{
+                selectedArea.properties[
+                  "Final 2016 demographics table_Average household size"
+                ]
+              }}
+            </span>
+          </div>
+          <div class="flex justify-between items-center p-1">
+            <span>Population 2016:</span>
+            <span class="font-bold">{{
+              selectedArea.properties["Population 2016"] | number
+            }}
+            </span>
+          </div>
+          <div class="flex justify-between items-center p-1">
+            <span>Total income: Average amount ($):</span>
+            <span class="font-bold">{{
+              selectedArea.properties["Total income: Average amount ($)"] | currency
+            }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+
+    </mgl-popup>
+  </mgl-layer>
 </mgl-map>
+
+<div id="state-legend" class="legend">
+  <h4>Incomes</h4>
+  <div *ngFor="let income of sortedIncomes">
+    <span [style.backgroundColor]="income.color"></span>
+    {{ income.value |   number }}
+  </div>
+</div>
